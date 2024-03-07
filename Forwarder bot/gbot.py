@@ -6,12 +6,16 @@ api_id = config("API_ID")
 api_hash = config('API_HASH')
 chat_id = config('CHAT_ID', cast=int)
 destination_chat_id = config('DESTINATION_CHAT_ID', cast=int)
+forbidden_words = config('FORBIDDEN_WORDS').split(', ')
 
 app = Client("my_account", api_id=api_id, api_hash=api_hash)
 
 @app.on_message()
 def handle_message(client, message: Message):
     if message.chat.id == chat_id:
+        if any(word in message.text.lower() for word in forbidden_words):
+            print("Found forbidden word in the message:", message.text)
+            return  # Do not proceed further if forbidden word found
         if message.text:
             print("Received message in the supergroup:", message.text)
             app.send_message(destination_chat_id, message.text)
