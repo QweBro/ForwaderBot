@@ -4,7 +4,7 @@ from decouple import config
 
 api_id = config("API_ID")
 api_hash = config('API_HASH')
-chat_id = config('CHAT_ID', cast=int)
+chat_ids = config('CHAT_IDS', cast=lambda v: [int(i) for i in v.split(',')])
 destination_chat_id = config('DESTINATION_CHAT_ID', cast=int)
 forbidden_words = config('FORBIDDEN_WORDS').split(', ')
 
@@ -12,10 +12,10 @@ app = Client("my_account", api_id=api_id, api_hash=api_hash)
 
 @app.on_message()
 def handle_message(client, message: Message):
-    if message.chat.id == chat_id:
+    if message.chat.id in chat_ids:
         if any(word in message.text.lower() for word in forbidden_words):
             print("Found forbidden word in the message:", message.text)
-            return  # Do not proceed further if forbidden word found
+            return 
         if message.text:
             print("Received message in the supergroup:", message.text)
             app.send_message(destination_chat_id, message.text)
